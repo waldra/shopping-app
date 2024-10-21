@@ -1,21 +1,17 @@
 pipeline{
-    agent any
+    agent {
+        docker { image: 'maven:3.8.1-openjdk-8' }
+    }
 
     stages{
-        stage("Back-end") {
-            agent {
-                docker { image 'maven:3.8.1-openjdk-11' }
-            }
+        stage("Code Checkout") {
             steps {
-                sh 'mvn --version'
+                git branch: 'main', url: 'https://github.com/waldra/shopping-cart.git'
             }
         }
-        stage("Front-end") {
-            agent {
-                docker { image 'node:16-alpine' }
-            }
+        stage("Compile") {
             steps {
-                sh 'node --version'
+                sh 'mvn clean test'
             }
         }
     }
