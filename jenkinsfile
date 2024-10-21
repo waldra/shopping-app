@@ -2,16 +2,35 @@ pipeline{
     agent {
         docker { image 'maven:3.8.1-openjdk-8' }
     }
+    tools {
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
 
     stages{
         stage("Code Checkout") {
+         /*   agent {
+                docker { image 'maven:3.8.1-openjdk-8' }
+            } */
             steps {
                 git branch: 'main', url: 'https://github.com/waldra/shopping-cart.git'
             }
         }
+
         stage("Compile") {
             steps {
                 sh 'mvn clean test'
+            }
+        }
+
+        stage("Code Quality Check") {
+            steps {
+                withSonarQubeEnv('sonarqube-server') {
+                    sh''' ${SCANNER_HOME}/bin/sonar-scanner \
+                    -Dsonar.projectName=shopping-card \
+                    -Dsonar.projectKey=shopping-card \
+                    -Dsonar.java.binaries=. '''
+    
+                }
             }
         }
     }
